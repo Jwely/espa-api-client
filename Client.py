@@ -144,9 +144,10 @@ class Client(BaseClient):
             items = self.get_item_status(order_num).json()
             if "orderid" in items.keys(): # if this funciton is nested, need to parse more
                 items = items["orderid"][order_num]
-            for item in items:
-                if item["status"] == status:
-                    yield item
+            if isinstance(items, list):
+                for item in items:
+                    if item["status"] == status:
+                        yield item
 
     def find_order_with_note(self, search_note, active_only=True):
 
@@ -174,9 +175,9 @@ class Client(BaseClient):
                 return self.post_order(order).json()
 
     def _download_order(self, order, downloader):
-        all_items = self.get_item_status(order)
-        complete_items = list(self.get_items_by_status("complete"))
-        error_items = list(self.get_item_status("error"))
+        all_items = self.get_item_status(order).json()
+        complete_items = list(self.get_items_by_status(order, "complete"))
+        error_items = list(self.get_item_status(order, "error"))
         halted_items = complete_items + error_items
         for c in complete_items:
             source = c.json()["product_dload_url"]
@@ -186,7 +187,6 @@ class Client(BaseClient):
             return True
         else:
             return False
-
 
     def download_order(self, order, downloader, sleep_time=300, timeout=86400):
 
@@ -199,10 +199,11 @@ class Client(BaseClient):
             elapsed_time = (datetime.now() - starttime).seconds
             reached_timeout = elapsed_time < timeout
             print("Elapsed time is {0}s".format(elapsed_time))
-            sleep(sleep_time)
 
             # try to complete all downloads again
             complete = self._download_order(order, downloader)
+
+            sleep(sleep_time)
 
 
 
