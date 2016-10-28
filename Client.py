@@ -142,7 +142,7 @@ class Client(BaseClient):
                 yield from self.get_items_by_status(order_num=order, status=status)
         else:
             items = self.get_item_status(order_num).json()
-            if "orderid" in items.keys: # if this funciton is nested, need to parse more
+            if "orderid" in items.keys(): # if this funciton is nested, need to parse more
                 items = items["orderid"][order_num]
             for item in items:
                 if item["status"] == status:
