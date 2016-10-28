@@ -1,5 +1,5 @@
 # espa-api-client
-trying out some interface with the new espa-api
+trying out some interface with the new [API for ordering from ESPA](https://github.com/USGS-EROS/espa-api)
 
 Example
 
