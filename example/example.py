@@ -34,9 +34,7 @@ order["olitirs8"]["inputs"] = get_order_inputs_from_earth_explorer_export("examp
 order["etm7"]["inputs"] = get_order_inputs_from_earth_explorer_export("example/L7_export.csv")
 
 # create a client and make our order
-username = ""   # my username
-password = ""   # my password
-c = Client((username, password))
+c = Client()
 d = LocalDownloader(local_dir="example/download")
 r = c.safe_post_order(order)
 c.download_order(r["orderid"], downloader=d)

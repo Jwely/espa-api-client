@@ -45,15 +45,32 @@ class BaseClient(object):
     readable response data
     """
 
-    def __init__(self, auth):
+    def __init__(self, auth=None):
         """
         :param auth: required tuple of (username, password) strings.
         """
-        self.auth = auth
+        if auth is None:
+            username = str(input("espa username:"))
+            password = str(input("espa password:"))
+            self.auth = (username, password)
+        else:
+            self.auth = auth
+
         self.headers = HEADERS
         self.host = API_HOST_URL
         self.version = 'v0'         # I presume this will work for future versions
         self.verbose = False        # TODO: verbose dev flag, remove or expose
+
+        if not self._test_auth():
+            raise Exception("Failed to authenticate at https://espa.cr.usgs.gov/login")
+
+    def _test_auth(self):
+        user = self.get_user()
+
+        if "Invalid username/password" in user.json().values():
+            return False
+        else:
+            return True
 
     def _url(self, *args):
         """
@@ -180,8 +197,10 @@ class Client(BaseClient):
         error_items = list(self.get_item_status(order, "error"))
         halted_items = complete_items + error_items
         for c in complete_items:
-            source = c.json()["product_dload_url"]
-            downloader.download(source)
+            if isinstance(c, dict):
+                downloader.download(c["product_dload_url"])
+            elif isinstance(c, requests.Request):
+                downloader.download(c.json()["product_dload_url"])
 
         if len(halted_items) == len(all_items):
             return True
