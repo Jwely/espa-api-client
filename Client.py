@@ -11,18 +11,10 @@ API_HOST_URL = 'https://espa.cr.usgs.gov'
 HEADERS = {'Content-Type': 'application/json'}
 
 
-class LocalDownloader(object):
+class BaseDownloader(object):
 
-    def __init__(self, local_dir):
-        self.local_dir = local_dir
-
-    def destination_mapper(self, source):
-        filename = os.path.basename(source)
-        return os.path.join(self.local_dir, filename)
-
-    def download(self, source):
-        dest = self.destination_mapper(source)
-
+    @staticmethod
+    def _download(source, dest):
         if not os.path.exists(dest):
             wget.download(url=source, out=dest)
 
@@ -35,6 +27,20 @@ class LocalDownloader(object):
         # clean up temporary compressed folder
         os.remove(dest)
         return extract_dest
+
+
+class LocalDownloader(BaseDownloader):
+
+    def __init__(self, local_dir):
+        self.local_dir = local_dir
+
+    def destination_mapper(self, source):
+        filename = os.path.basename(source)
+        return os.path.join(self.local_dir, filename)
+
+    def download(self, source):
+        dest = self.destination_mapper(source)
+        return self._download(source, dest)
 
 
 class BaseClient(object):
