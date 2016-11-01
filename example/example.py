@@ -31,8 +31,14 @@ def main():
     orderid = order.submit(client)['orderid']
     for download in client.download_order_gen(orderid, downloader):
         print(download)
+
+        # download is a tuple with the filepath, and True if the file
+        # is a fresh download.
+
         # this is where data pipeline scripts go that can operate
-        # on files as they are downloaded (generator)
+        # on files as they are downloaded (generator),
+
+        # See the Client class for further documentation.
 
 if __name__ == "__main__":
     main()
