@@ -2,6 +2,7 @@ import requests
 import json
 from time import sleep
 from datetime import datetime
+from espa_api_client import API_HOST_URL, HEADERS
 
 
 class BaseClient(object):

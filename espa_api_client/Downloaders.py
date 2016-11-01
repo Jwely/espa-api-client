@@ -119,7 +119,7 @@ class EspaLandsatLocalDownloader(BaseDownloader):
 
 
 class EspaMODISLocalDownloader(BaseDownloader):
-    
+
     def __init__(self):
         raise NotImplementedError('''
         Since the EPSA service offers landsat and MODIS products, and im not sure
