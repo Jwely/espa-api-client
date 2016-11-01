@@ -1,4 +1,21 @@
 
 .idea
 *.pyc
-example/downloads
+
+# ignore example downloads, but keep template
+docs/example/downloads
+!espa_api_client/templates/example_dc_metro.json
+
+# ignore all other json templates.
+espa_api_client/templates/*.json
+
+# pip stuff
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~
+

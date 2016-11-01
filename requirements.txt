@@ -1,0 +1,4 @@
+requests
+wget
+pandas
+
