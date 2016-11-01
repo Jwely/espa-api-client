@@ -240,9 +240,9 @@ class Client(BaseClient):
             def is_complete():
                 return len(self._active_items(order, verbose=True)) < 1
 
+            # check for completeness and break or wait.
             if is_complete():
                 sleep(10)
                 if is_complete():
                     break
-            else:
-                sleep(sleep_time)
+            sleep(sleep_time)
