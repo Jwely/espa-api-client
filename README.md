@@ -37,7 +37,7 @@ from espa_api_client.Downloaders import EspaLandsatLocalDownloader
 # build the various handlers to spec
 template = OrderTemplate('example_dc_metro')
 order = Order(template, note="DC-metro-20161101")
-client = Client()
+client = Client()   # will prompt user for username and password if auth argument not supplied
 downloader = EspaLandsatLocalDownloader('downloads')
 
 l8_tiles = get_order_inputs_from_earth_explorer_export('L8_export.csv')
@@ -58,7 +58,27 @@ for download in client.download_order_gen(orderid, downloader):
 
 ```
 
-The json template looks like this:
+## Templates
+At present, there is no helper to construct a good template. The recomended process currently requires the user
+to create their own json string and generate a template for later user via:
+```python
+my_template = OrderTemplate('my_template_name')
+my_template.template = my_big_json_string
+my_template.save()
+
+# subsequently it will automatically load when we use
+my_template = OrderTemplate('my_template_name')
+```
+To create a template, you can examine the order schema with an api request.
+```python
+from pprint import pprint
+auth = (username, password)
+my_client = Client(auth)  # authenticate client or just leave blank for prompt.
+resp = my_client.get_order_schema()  # ask API about order schema
+pprint(resp.json())  #print the response in readable json
+```
+
+The json template used in the example looks like this:
 ```json
 {
     "olitirs8": {
