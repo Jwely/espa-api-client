@@ -13,8 +13,6 @@ This script uses an order note, which only allows the order to be submitted if a
 order with the same note is not already associated with the account. This prevents duplicate
 ordering, and also allows the same ordering code to simply be run again at a later time
 to download the order products if the script is halted.
-
-The
 """
 
 

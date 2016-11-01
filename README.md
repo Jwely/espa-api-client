@@ -4,46 +4,46 @@ trying out some interface with the new [API for ordering from ESPA](https://gith
 Example
 
 ```python
-from parse import get_order_inputs_from_earth_explorer_export
-from Client import Client, LocalDownloader
+from espa_api_client.Clients import Client
+from espa_api_client.Order import Order
+from espa_api_client.OrderTemplate import OrderTemplate
+from espa_api_client.parse import get_order_inputs_from_earth_explorer_export
+from espa_api_client.Downloaders import EspaLandsatLocalDownloader
 
 """
 An example for ordering a few tiles from landsat 7 and 8, as created
-from an Earth explorer export, with some simple subsetting operations
-and a geographic projection.
+from an Earth explorer export and a predefined order template, which follows
+the schema described at the espa-api host repo: https://github.com/USGS-EROS/espa-api
+
+This script uses an order note, which only allows the order to be submitted if another
+order with the same note is not already associated with the account. This prevents duplicate
+ordering, and also allows the same ordering code to simply be run again at a later time
+to download the order products if the script is halted.
 """
 
-# orde template that follows the order schema
-order = {
-    "olitirs8": {
-        "inputs": [],   # my desired landsat 8 tiles go here
-        "products": ["sr", "sr_ndvi", "sr_savi", "sr_msavi", "cloud"]
-    },
-    "etm7": {
-        "inputs": [],   # desired landsat 7 tiles go here
-        "products": ["sr", "sr_ndvi", "sr_savi", "sr_msavi", "cloud"]
-    },
-    "format": "gtiff",
-    "plot_statistics": False,
-    "projection": {"lonlat": None},  # standard geographic projection
-    "image_extents": {
-        "north": 39.0,
-        "south": 38.7,
-        "east": -76.8,
-        "west": -77.2,
-        "units": "dd"
-    },
-    "note": "20161028-DC"
-}
 
-order["olitirs8"]["inputs"] = get_order_inputs_from_earth_explorer_export("example/L8_export.csv")
-order["etm7"]["inputs"] = get_order_inputs_from_earth_explorer_export("example/L7_export.csv")
+def main():
+    template = OrderTemplate('dc_metro')
+    order = Order(template, note="DC-metro-20161101")
+    client = Client()
+    downloader = EspaLandsatLocalDownloader('downloads')
 
-# create a client and make our order
-username = ""   # my username
-password = ""   # my password
-c = Client((username, password))
-d = LocalDownloader(local_dir="example/download")
-r = c.safe_post_order(order)
-c.download_order(r["orderid"], downloader=d)
+    l8_tiles = get_order_inputs_from_earth_explorer_export('L8_export.csv')
+    l7_tiles = get_order_inputs_from_earth_explorer_export('L7_export.csv')
+    order.add_tiles("olitirs8", l8_tiles)
+    order.add_tiles("etm7", l7_tiles)
+    orderid = order.submit(client)['orderid']
+    for download in client.download_order_gen(orderid, downloader):
+        print(download)
+
+        # download is a tuple with the filepath, and True if the file
+        # is a fresh download.
+
+        # this is where data pipeline scripts go that can operate
+        # on files as they are downloaded (generator),
+
+        # See the Client class for further documentation.
+
+if __name__ == "__main__":
+    main()
 ```
