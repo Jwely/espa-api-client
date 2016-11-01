@@ -2,7 +2,8 @@
 trying out some interface with the new [API for ordering from ESPA](https://github.com/USGS-EROS/espa-api)
 
 This API allows lost of custom processing of surface reflectance corrected data for landsat, and some other very
-useful science grade computations.
+useful science grade computations. So, this python client provides some friendly interfaces with the API to make life
+a little easier.
 
 ## Installation
 Note, at this stage, the package is completely untested outside of py3 on Ubuntu 16. 
@@ -84,6 +85,7 @@ The json template looks like this:
 ```
 
 ## TODO:
+* better docs
 * Need downloader for landsat and modis to be separate, and easily selected by the client.
 * Some kind of template creation assistant would be good
 * Template creation assistant could also include order validation. ESPA already has their code for this made public.
