@@ -224,7 +224,7 @@ class Client(BaseClient):
             # wait a while before the next ping and check timeout condition
             elapsed_time = (datetime.now() - starttime).seconds
             reached_timeout = elapsed_time > timeout
-            print("Elapsed time is {0}s".format(elapsed_time))
+            print("Elapsed time is {0}m".format(elapsed_time / 60.0))
 
             # check order completion status, and list all items which ARE complete
             complete_items = self._complete_items(order, verbose=False)
@@ -242,4 +242,6 @@ class Client(BaseClient):
 
             # check for completeness and break or wait.
             complete = is_complete()
+            if complete:
+                break
             sleep(sleep_time)
