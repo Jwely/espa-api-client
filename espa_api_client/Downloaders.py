@@ -90,6 +90,7 @@ class EspaLandsatLocalDownloader(BaseDownloader):
         tilename = filename
         return os.path.join(self.local_dir, tilename)
 
+    # TODO: function should verify that a source url looks like a landsat tile.
     def download(self, source, mode='w', cleanup=True):
         """
         Downloads the source url and extracts it to a folder. Returns
@@ -115,3 +116,12 @@ class EspaLandsatLocalDownloader(BaseDownloader):
             os.remove(raw_dest)
 
         return ext_dest, fresh
+
+
+class EspaMODISLocalDownloader(BaseDownloader):
+    raise NotImplementedError('''
+    Since the EPSA service offers landsat and MODIS products, and im not sure
+    the landsat local downloader will work for MODIS (it expects tar.gz files
+    with landsat folders inside), there really should be a downloader class
+    for MODIS data
+    ''')

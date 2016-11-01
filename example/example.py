@@ -1,5 +1,6 @@
 from espa_api_client.Clients import Client
-from espa_api_client.Order import OrderTemplate, Order
+from espa_api_client.Order import Order
+from espa_api_client.OrderTemplate import OrderTemplate
 from espa_api_client.parse import get_order_inputs_from_earth_explorer_export
 from espa_api_client.Downloaders import EspaLandsatLocalDownloader
 
