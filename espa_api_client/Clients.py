@@ -180,14 +180,14 @@ class Client(BaseClient):
     def _active_items(self, order, verbose=False):
         """ returns list of items with active statuses, can print summary."""
         all_items = self.get_item_status(order).json()["orderid"][order]
-        not_halted_items = [item for item in all_items
-                            if item['status'] != 'complete' and item['status'] != 'error']
+        active_items = [item for item in all_items
+                        if item['status'] != 'complete' and item['status'] != 'error']
         if verbose:
-            if len(not_halted_items) > 0:
-                print("Active items ({0})".format(len(not_halted_items)))
-                for item in not_halted_items:
+            if len(active_items) > 0:
+                print("Active items ({0})".format(len(active_items)))
+                for item in active_items:
                     print('\t', item["name"], item["status"])
-        return not_halted_items
+        return active_items
 
     def _complete_items(self, order, verbose=False):
         """
@@ -227,7 +227,6 @@ class Client(BaseClient):
             print("Elapsed time is {0}s".format(elapsed_time))
 
             # check order completion status, and list all items which ARE complete
-            complete = len(self._active_items(order, verbose=True)) < 1
             complete_items = self._complete_items(order, verbose=False)
 
             for c in complete_items:
@@ -238,7 +237,12 @@ class Client(BaseClient):
                     url = c.json()["product_dload_url"]
                     yield downloader.download(url, **dlkwargs)
 
-            if complete:
-                break
+            def is_complete():
+                return len(self._active_items(order, verbose=True)) < 1
+
+            if is_complete():
+                sleep(10)
+                if is_complete():
+                    break
             else:
                 sleep(sleep_time)
