@@ -2,7 +2,7 @@ import requests
 import json
 from time import sleep
 from datetime import datetime
-from espa_api_client import API_HOST_URL, HEADERS
+from espa_api_client import API_HOST_URL, API_VERSION, HEADERS
 
 
 class BaseClient(object):
@@ -26,7 +26,7 @@ class BaseClient(object):
 
         self.headers = HEADERS
         self.host = API_HOST_URL
-        self.version = 'v0'  # I presume this will work for future versions
+        self.version = API_VERSION
         self.verbose = False  # TODO: verbose dev flag, remove or expose
 
         if not self._test_auth():
