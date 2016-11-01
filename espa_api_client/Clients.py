@@ -2,10 +2,6 @@ import requests
 import json
 from time import sleep
 from datetime import datetime
-from pprint import pprint
-
-API_HOST_URL = 'https://espa.cr.usgs.gov'
-HEADERS = {'Content-Type': 'application/json'}
 
 
 class BaseClient(object):
@@ -205,6 +201,7 @@ class Client(BaseClient):
                     print('\t', item["name"], item["completion_date"])
         return complete_items
 
+    # TODO: some check to ensure input downloader is appropriate for each filet ype.
     def download_order_gen(self, order, downloader, sleep_time=300, timeout=86400, **dlkwargs):
         """
         This function is a generator that yields the results from the input downloader classes
