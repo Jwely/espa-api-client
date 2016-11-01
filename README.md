@@ -1,9 +1,7 @@
 # espa-api-client
-Python interface to the [API for ordering from ESPA](https://github.com/USGS-EROS/espa-api)
+`current-version = 1.0.0.dev3`
 
-This API allows lost of custom processing of surface reflectance corrected data for landsat, and some other very
-useful science grade computations. So, this python client provides some friendly interfaces with the API to make life
-a little easier.
+Python interface to the [API for ordering from ESPA](https://github.com/USGS-EROS/espa-api). This API allows lost of custom processing of surface reflectance corrected data for landsat, and some other very useful science grade computations. So, this python client provides some friendly interfaces with the API to make life a little easier.
 
 ## Installation
 Note, at this stage, the package is completely untested outside of py3 on Ubuntu 16. 
@@ -22,9 +20,12 @@ and desired products for each mission, landsat 8 and landsat 7. That template fo
 that you can read more about at the espa-api page. It then reads the desired landsat tiles from a csv file created by
 exporting search results from [Earth Explorer](http://earthexplorer.usgs.gov/), and adds them to an order created
 from the template. It gives that order a unique name in the "note" field, to promote good data management practice but also
-to provide a simple way of preventing duplicate orders to the ESPA API. It then submits the order, and retreives the order ID from the servers response. It then issues a download command on that order, that will yield completed download filepaths as they are available, and self terminate when all files have been either downloaded or experienced a server internal error.
+to provide a simple way of preventing duplicate orders to the ESPA API. It then submits the order, and retreives the order 
+ID from the servers response. It then issues a download command on that order, that will yield completed download 
+filepaths as they are available, and self terminate when all files have been either downloaded or experienced a server internal error.
 
-One script to order, download, and process data, that need only be run once, but can be terminated and re-executed without issue.
+One script to order, download, and process data, that need only be run once, but can be terminated and 
+re-executed without issue.
 
 ```python
 from espa_api_client.Clients import Client
