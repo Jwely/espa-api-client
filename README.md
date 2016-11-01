@@ -4,6 +4,17 @@ trying out some interface with the new [API for ordering from ESPA](https://gith
 This API allows lost of custom processing of surface reflectance corrected data for landsat, and some other very
 useful science grade computations.
 
+## Installation
+Note, at this stage, the package is completely untested outside of py3 on Ubuntu 16. 
+
+```
+pip install espa-api-client
+```
+or for python3
+```
+pip3 install espa-api-client
+```
+
 ## Example
 The example below will load an order template for the DC metro area with our custom output preferences
 and desired products for each mission, landsat 8 and landsat 7. That template follows the api order schema
