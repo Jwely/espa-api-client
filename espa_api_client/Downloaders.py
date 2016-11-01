@@ -119,9 +119,11 @@ class EspaLandsatLocalDownloader(BaseDownloader):
 
 
 class EspaMODISLocalDownloader(BaseDownloader):
-    raise NotImplementedError('''
-    Since the EPSA service offers landsat and MODIS products, and im not sure
-    the landsat local downloader will work for MODIS (it expects tar.gz files
-    with landsat folders inside), there really should be a downloader class
-    for MODIS data
-    ''')
+    
+    def __init__(self):
+        raise NotImplementedError('''
+        Since the EPSA service offers landsat and MODIS products, and im not sure
+        the landsat local downloader will work for MODIS (it expects tar.gz files
+        with landsat folders inside), there really should be a downloader class
+        for MODIS data
+        ''')
