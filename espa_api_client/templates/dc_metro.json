@@ -1,0 +1,23 @@
+{
+    "olitirs8": {
+        "inputs": [],
+        "products": ["sr", "sr_ndvi", "sr_savi", "sr_msavi", "cloud"]
+    },
+    "etm7": {
+        "inputs": [],
+        "products": ["sr", "sr_ndvi", "sr_savi", "sr_msavi", "cloud"]
+    },
+    "format": "gtiff",
+    "plot_statistics": false,
+    "projection": {
+      "lonlat": null
+    },
+    "image_extents": {
+        "north": 39.0,
+        "south": 38.7,
+        "east": -76.8,
+        "west": -77.2,
+        "units": "dd"
+    },
+    "note": ""
+}

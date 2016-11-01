@@ -1,46 +1,11 @@
 import requests
 import json
-import os
-import wget
-import tarfile
 from time import sleep
 from datetime import datetime
-
+from pprint import pprint
 
 API_HOST_URL = 'https://espa.cr.usgs.gov'
 HEADERS = {'Content-Type': 'application/json'}
-
-
-class BaseDownloader(object):
-
-    @staticmethod
-    def _download(source, dest):
-        if not os.path.exists(dest):
-            wget.download(url=source, out=dest)
-
-        # now extract the targz
-        extract_dest = dest.replace(".tar.gz", "")
-        with tarfile.open(dest, 'r:gz') as tfile:
-            tfile.extractall(extract_dest)
-            print("Extracted {0}".format(extract_dest))
-
-        # clean up temporary compressed folder
-        os.remove(dest)
-        return extract_dest
-
-
-class LocalDownloader(BaseDownloader):
-
-    def __init__(self, local_dir):
-        self.local_dir = local_dir
-
-    def destination_mapper(self, source):
-        filename = os.path.basename(source)
-        return os.path.join(self.local_dir, filename)
-
-    def download(self, source):
-        dest = self.destination_mapper(source)
-        return self._download(source, dest)
 
 
 class BaseClient(object):
@@ -64,8 +29,8 @@ class BaseClient(object):
 
         self.headers = HEADERS
         self.host = API_HOST_URL
-        self.version = 'v0'         # I presume this will work for future versions
-        self.verbose = False        # TODO: verbose dev flag, remove or expose
+        self.version = 'v0'  # I presume this will work for future versions
+        self.verbose = False  # TODO: verbose dev flag, remove or expose
 
         if not self._test_auth():
             raise Exception("Failed to authenticate at https://espa.cr.usgs.gov/login")
@@ -144,6 +109,14 @@ class Client(BaseClient):
      filtering responses from the native API calls and expressing them
      a little more usefully.
     """
+    def __init__(self, auth=None):
+        super(Client, self).__init__(auth)
+        self.schema = self.get_order_schema().json()
+
+    def available_sensors(self):
+        """ lists available sensors from the order schema """
+        return sorted(self.schema["oneormoreobjects"])
+
     def get_active_orders(self):
         """
         generator of orders which have not yet been purged.
@@ -165,7 +138,7 @@ class Client(BaseClient):
                 yield from self.get_items_by_status(order_num=order, status=status)
         else:
             items = self.get_item_status(order_num).json()
-            if "orderid" in items.keys(): # if this funciton is nested, need to parse more
+            if "orderid" in items.keys():  # if this funciton is nested, need to parse more
                 items = items["orderid"][order_num]
             if isinstance(items, list):
                 for item in items:
@@ -197,24 +170,54 @@ class Client(BaseClient):
             else:
                 return self.post_order(order).json()
 
-    def _download_order(self, order, downloader):
-        all_items = self.get_item_status(order).json()
-        complete_items = list(self.get_items_by_status(order, "complete"))
+    def _error_items(self, order, verbose=False):
+        """ returns list of items with status 'error', can print summary. """
         error_items = list(self.get_item_status(order, "error"))
-        halted_items = complete_items + error_items
-        for c in complete_items:
-            if isinstance(c, dict):
-                downloader.download(c["product_dload_url"])
-            elif isinstance(c, requests.Request):
-                downloader.download(c.json()["product_dload_url"])
+        if verbose:
+            if len(error_items) > 0:
+                print("Fatal Error items ({0})".format(len(error_items)))
+                for item in error_items:
+                    print('\t', item["name"], item["note"])
+        return error_items
 
-        if len(halted_items) == len(all_items):
-            return True
-        else:
-            return False
+    def _active_items(self, order, verbose=False):
+        """ returns list of items with active statuses, can print summary."""
+        all_items = self.get_item_status(order).json()["orderid"][order]
+        not_halted_items = [item for item in all_items
+                            if item['status'] != 'complete' and item['status'] != 'error']
+        if verbose:
+            if len(not_halted_items) > 0:
+                print("Active items ({0})".format(len(not_halted_items)))
+                for item in not_halted_items:
+                    print('\t', item["name"], item["status"])
+        return not_halted_items
 
-    def download_order(self, order, downloader, sleep_time=300, timeout=86400):
+    def _complete_items(self, order, verbose=False):
+        """
+        checks order for completed items (ready for download) and then returns
+        a list of completed items
+        """
+        complete_items = list(self.get_items_by_status(order, "complete"))
+        if verbose:
+            if len(complete_items) > 0:
+                print("Completed items ({0})".format(len(complete_items)))
+                for item in complete_items:
+                    print('\t', item["name"], item["completion_date"])
+        return complete_items
 
+    def download_order_gen(self, order, downloader, sleep_time=300, timeout=86400, **dlkwargs):
+        """
+        This function is a generator that yields the results from the input downloader classes
+        download() method. This is a generator mostly so that data pipeline functions that operate
+        upon freshly downloaded files may immediately get started on them.
+
+        :param order:               order name
+        :param downloader:          instance of a Downloaders.BaseDownloader or child class
+        :param sleep_time:          number of seconds to wait between checking order status
+        :param timeout:             maximum number of seconds to run program
+        :param dlkwargs:            keyword arguments for downloader.download() method.
+        :returns:                   yields values from the input downloader.download() method.
+        """
         complete = False
         reached_timeout = False
         starttime = datetime.now()
@@ -225,32 +228,19 @@ class Client(BaseClient):
             reached_timeout = elapsed_time < timeout
             print("Elapsed time is {0}s".format(elapsed_time))
 
-            # try to complete all downloads again
-            complete = self._download_order(order, downloader)
+            # check order completion status, and list all items which ARE complete
+            complete = len(self._active_items(order, verbose=True)) < 1
+            complete_items = self._complete_items(order, verbose=False)
 
-            sleep(sleep_time)
+            for c in complete_items:
+                if isinstance(c, dict):
+                    url = c["product_dload_url"]
+                    yield downloader.download(url, **dlkwargs)
+                elif isinstance(c, requests.Request):
+                    url = c.json()["product_dload_url"]
+                    yield downloader.download(url, **dlkwargs)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            if complete:
+                break
+            else:
+                sleep(sleep_time)
