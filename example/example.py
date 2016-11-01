@@ -17,7 +17,7 @@ to download the order products if the script is halted.
 
 
 def main():
-    template = OrderTemplate('dc_metro')
+    template = OrderTemplate('example_dc_metro')
     order = Order(template, note="DC-metro-20161101")
     client = Client()
     downloader = EspaLandsatLocalDownloader('downloads')
