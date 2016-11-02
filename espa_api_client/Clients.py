@@ -144,7 +144,29 @@ class Client(BaseClient):
                     if item["status"] == status:
                         yield item
 
-    def find_order_with_note(self, search_note, active_only=True):
+    def list_order_notes(self, active_only=True, verbose=False):
+        """
+        Returns a list of tuples, where the first element of the tuple
+        is the order name, and the second element is the note used for that
+        order
+        """
+        if active_only:
+            order_names = self.get_active_orders()
+        else:
+            order_names = self.get_orders_list().json()["orders"]
+
+        order_notes = [(o, self.get_order(o).json()['note']) for o in order_names]
+        if verbose:
+            if active_only:
+                print("Active Orders / Notes")
+            else:
+                print("Orders / Notes")
+            for o, n in order_notes:
+                print(o, '\t', n)
+
+        return order_notes
+
+    def find_orders_with_note(self, search_note, active_only=True):
         """
         Finds an order with a note which CONTAINS the search note. An
         input note of "my-order" will return an order with note
@@ -152,19 +174,16 @@ class Client(BaseClient):
 
         not sure if this behavior is desired or not.
         """
-        if active_only:
-            orders = self.get_active_orders()
-        else:
-            orders = self.get_orders_list().json()["orders"]
-
-        for order_name in orders:
-            note = self.get_order(order_name).json()["note"]
-            if note is not None:
+        return_list = []
+        order_notes = self.list_order_notes(active_only=active_only)
+        for order_name, note in order_notes:
+            if note:
                 if search_note in note:
-                    yield order_name
+                    return_list.append(order_name)
+        return return_list
 
     def safe_post_order(self, order_id, active_only=True):
-        """
+        """12222
         exactly as .post_order() of the parent class, but will first
         check for existing orders with a common 'note' field. If one or more
         are found, function returns a response that looks like a fresh
@@ -173,11 +192,10 @@ class Client(BaseClient):
         if "note" in order_id.keys():
             new_note = order_id["note"]
 
-            orders_with_same_note = list(self.find_order_with_note(new_note, active_only))
+            orders_with_same_note = self.find_orders_with_note(new_note, active_only)
             if len(orders_with_same_note) > 0:
                 print("Found duplicate past order(s): {0}".format(orders_with_same_note))
-                print("input note: {0}".format(new_note))
-                print("existing note: {0}".format(orders_with_same_note[0]['note']))
+                print("Returning {0}".format({"orderid": orders_with_same_note[0]}))
                 return {"orderid": orders_with_same_note[0]}
             else:
                 return self.post_order(order_id).json()

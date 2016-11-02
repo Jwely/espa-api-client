@@ -29,7 +29,7 @@ class Order(object):
             return not bool(s and s.strip())
 
         self.template = self._set_template(template)
-        self.order_content = template.template
+        self.order_content = template.template_content
         self.set_order_note(note)
 
         if enforce_note:
