@@ -66,6 +66,8 @@ for download in client.download_order_gen(orderid, downloader):
 ```
 
 ## Templates
+
+#### Defining templates
 At present, there is no helper to construct a good template. The recomended process currently requires the user
 to create their own template in dictionary format, then save it (which exports it to a template json file).
 ```python
@@ -87,7 +89,7 @@ my_client = Client(auth)  # authenticate client or just leave blank for prompt.
 resp = my_client.get_order_schema()  # ask API about order schema
 pprint(resp.json())  #print the response in readable json
 ```
-
+#### Example templates
 The json template used in the example looks like this:
 ```json
 {
