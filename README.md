@@ -1,7 +1,7 @@
 # espa-api-client
 `current-version = 1.0.0.dev5`
 
-Python interface to the [API for ordering from ESPA](https://github.com/USGS-EROS/espa-api). This API allows lost of custom processing of surface reflectance corrected data for landsat, and some other very useful science grade computations. So, this python client provides some friendly interfaces with the API to make life a little easier.
+Python interface to the [API for ordering from ESPA](https://github.com/USGS-EROS/espa-api). This API allows lots of custom processing of surface reflectance corrected data for landsat, and some other very useful science grade computations. So, this python client provides some friendly interfaces with the API to make life a little easier.
 
 ## Installation
 Note, at this stage, the package is completely untested outside of py3 on Ubuntu 16. 
