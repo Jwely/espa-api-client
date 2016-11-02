@@ -68,10 +68,10 @@ for download in client.download_order_gen(orderid, downloader):
 
 ## Templates
 At present, there is no helper to construct a good template. The recomended process currently requires the user
-to create their own json string and generate a template for later user via:
+to create their own template in dictionary format, then save it (which exports it to a template json file).
 ```python
 my_template = OrderTemplate('my_template_name')
-my_template.template = my_big_json_string
+my_template.template = my_template_dict
 my_template.save()
 
 # subsequently it will automatically load when we use
