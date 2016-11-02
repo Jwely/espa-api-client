@@ -76,6 +76,9 @@ my_template.save()
 
 # subsequently it will automatically load when we use
 my_template = OrderTemplate('my_template_name')
+
+# or automatically be applied to an order with
+my_order = Order('my_template_name', note='my_note')
 ```
 To create a template, you can examine the order schema with an api request.
 ```python
