@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/espa-api-client.svg)](https://badge.fury.io/py/espa-api-client)
+
 # espa-api-client
 
 Python interface to the [API for ordering from ESPA](https://github.com/USGS-EROS/espa-api). This API allows lots of custom processing of surface reflectance corrected data for landsat, and some other very useful science grade computations. So, this python client provides some friendly interfaces with the API to make life a little easier.
@@ -66,11 +68,13 @@ for download in client.download_order_gen(orderid, downloader):
 ```
 
 ## Templates
+
+#### Defining templates
 At present, there is no helper to construct a good template. The recomended process currently requires the user
 to create their own template in dictionary format, then save it (which exports it to a template json file).
 ```python
 my_template = OrderTemplate('my_template_name')
-my_template.template = my_template_dict
+my_template.define(my_template_dict)
 my_template.save()
 
 # subsequently it will automatically load when we use
@@ -87,7 +91,7 @@ my_client = Client(auth)  # authenticate client or just leave blank for prompt.
 resp = my_client.get_order_schema()  # ask API about order schema
 pprint(resp.json())  #print the response in readable json
 ```
-
+#### Example templates
 The json template used in the example looks like this:
 ```json
 {
@@ -110,6 +114,34 @@ The json template used in the example looks like this:
         "east": -76.8,
         "west": -77.2,
         "units": "dd"
+    },
+    "note": ""
+}
+```
+
+Lets say you want a template that will work for ANY landsat tile over any geographic area, and just download the whole surface reflectance and cloud tiles in geotiff format for whatever tiles you input. You could use a template that looks like:
+```json
+{
+    "olitirs8": {
+        "inputs": [],
+        "products": ["sr", "cloud"]
+    },
+    "etm7": {
+        "inputs": [],
+        "products": ["sr", "cloud"]
+    },
+    "tm5": {
+        "inputs": [],
+        "products": ["sr", "cloud"]
+    },
+    "tm4": {
+        "inputs": [],
+        "products": ["sr", "cloud"]
+    },
+    "format": "gtiff",
+    "plot_statistics": false,
+    "projection": {
+      "lonlat": null
     },
     "note": ""
 }
