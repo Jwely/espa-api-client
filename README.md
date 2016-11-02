@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/espa-api-client.svg)](https://badge.fury.io/py/espa-api-client)
+
 # espa-api-client
 
 Python interface to the [API for ordering from ESPA](https://github.com/USGS-EROS/espa-api). This API allows lots of custom processing of surface reflectance corrected data for landsat, and some other very useful science grade computations. So, this python client provides some friendly interfaces with the API to make life a little easier.
