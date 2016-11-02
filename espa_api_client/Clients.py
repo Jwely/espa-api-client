@@ -3,6 +3,7 @@ import json
 from time import sleep
 from datetime import datetime
 from espa_api_client import API_HOST_URL, API_VERSION, HEADERS
+from espa_api_client.Exceptions import AuthError
 
 
 class BaseClient(object):
@@ -15,8 +16,7 @@ class BaseClient(object):
 
     def __init__(self, auth=None):
         """
-        :param auth: tuple of (username, password) strings. None input will
-                     prompt user for plain text input
+        :param auth: tuple of (username, password) strings.
         """
         if auth is None:
             username = str(input("espa username:"))
@@ -31,11 +31,11 @@ class BaseClient(object):
         self.verbose = False  # TODO: verbose dev flag, remove or expose
 
         if not self._test_auth():
-            raise Exception("Failed to authenticate at https://espa.cr.usgs.gov/login")
+            raise AuthError("Failed to authenticate at https://espa.cr.usgs.gov/login")
 
     def _test_auth(self):
+        """ checks that authentication info works """
         user = self.get_user()
-
         if "Invalid username/password" in user.json().values():
             return False
         else:

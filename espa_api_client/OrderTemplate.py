@@ -55,41 +55,44 @@ class OrderTemplate(object):
         Creates an order template instance. If input name already exists and
         auto_load is True, it will check for file '{name}.json' in the template_dir
         and load its contents if available. To create new order templates,
-        :param name:
-        :param auto_load:
-        :param template_dir:
+        :param name: (str) name for this template! (should be a valid filename)
+        :param auto_load: check template_dir for templates with this name
+        :param template_dir: folder where templates are stored.
         """
         self.name = name
         self.path = os.path.join(template_dir, "{}.json".format(self.name))
-        self.template = dict()
+        self.template_content = dict()
 
         if os.path.exists(self.path) and auto_load:
             self.load()
 
     def define(self, template_dict):
         """ allows input of template dictionary """
-        self.template.update(template_dict)
+        self.template_content.update(template_dict)
         self.save()
         return self
 
-    def save(self):
-        """ saves the template attribute to json """
-        with open(self.path, 'w+') as f:
-            f.write(json.dumps(self.template, indent=2))
-        print("Template saved to {0}".format(self.path))
+    def save(self, path=None):
+        """ saves the template attribute to json. dumps to template_dir if no path is supplied """
+        if path is None:
+            path = self.path
+
+        with open(path, 'w+') as f:
+            f.write(json.dumps(self.template_content, indent=2))
+        print("Template saved to {0}".format(path))
         return self
 
     def load(self, path=None):
-        """ loads template attribute from json """
+        """ loads template attribute from json. checks template_dir for file if no path is supplied """
         if path is None:
             path = self.path
         with open(path, 'r') as f:
-            self.template = json.loads(f.read())
+            self.template_content = json.loads(f.read())
             print("loaded template from {0}".format(path))
         return self
 
     def copy_from(self, template_name):
         """ replaces the order content in this template with that from another template """
         other_template = OrderTemplate(template_name)
-        self.template = other_template.load().template
+        self.template_content = other_template.load().template_content
         return self
