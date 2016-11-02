@@ -115,6 +115,34 @@ The json template used in the example looks like this:
 }
 ```
 
+Lets say you want a template that will work for ANY geographic area, and just download the whole surface reflectance and cloud tiles in geotiff format for whatever tiles you input. You could use a template that looks like:
+```json
+{
+    "olitirs8": {
+        "inputs": [],
+        "products": ["sr", "cloud"]
+    },
+    "etm7": {
+        "inputs": [],
+        "products": ["sr", "cloud"]
+    },
+    "tm5": {
+        "inputs": [],
+        "products": ["sr", "cloud"]
+    },
+    "tm4": {
+        "inputs": [],
+        "products": ["sr", "cloud"]
+    },
+    "format": "gtiff",
+    "plot_statistics": false,
+    "projection": {
+      "lonlat": null
+    },
+    "note": ""
+}
+```
+
 ## TODO:
 * better docs
 * Need downloader for landsat and modis to be separate, and easily selected by the client.
