@@ -117,7 +117,7 @@ The json template used in the example looks like this:
 }
 ```
 
-Lets say you want a template that will work for ANY geographic area, and just download the whole surface reflectance and cloud tiles in geotiff format for whatever tiles you input. You could use a template that looks like:
+Lets say you want a template that will work for ANY landsat tile over any geographic area, and just download the whole surface reflectance and cloud tiles in geotiff format for whatever tiles you input. You could use a template that looks like:
 ```json
 {
     "olitirs8": {
