@@ -70,7 +70,7 @@ At present, there is no helper to construct a good template. The recomended proc
 to create their own template in dictionary format, then save it (which exports it to a template json file).
 ```python
 my_template = OrderTemplate('my_template_name')
-my_template.template = my_template_dict
+my_template.define(my_template_dict)
 my_template.save()
 
 # subsequently it will automatically load when we use
