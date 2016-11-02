@@ -15,7 +15,8 @@ class BaseClient(object):
 
     def __init__(self, auth=None):
         """
-        :param auth: required tuple of (username, password) strings.
+        :param auth: tuple of (username, password) strings. None input will
+                     prompt user for plain text input
         """
         if auth is None:
             username = str(input("espa username:"))
@@ -94,10 +95,10 @@ class BaseClient(object):
     def get_projections(self):
         return self._get('projections')
 
-    def post_order(self, order):
-        if isinstance(order, dict):
-            order = json.dumps(order)
-        return self._post('order', data=order)
+    def post_order(self, order_content):
+        if isinstance(order_content, dict):
+            order_content = json.dumps(order_content)
+        return self._post('order', data=order_content)
 
 
 class Client(BaseClient):
@@ -126,24 +127,31 @@ class Client(BaseClient):
             else:
                 break
 
-    def get_items_by_status(self, order_num=None, status="complete"):
+    def get_items_by_status(self, order_id=None, status="complete"):
         """
-        generator of items with input status
+        generator of items with input status. Common status responses
+        are ['complete', 'error', 'queued', 'processing', 'cached'].
         """
-        if order_num is None:
-            for order in self.get_active_orders():
-                yield from self.get_items_by_status(order_num=order, status=status)
+        if order_id is None:
+            for order_id in self.get_active_orders():
+                yield from self.get_items_by_status(order_id=order_id, status=status)
         else:
-            items = self.get_item_status(order_num).json()
+            items = self.get_item_status(order_id).json()
             if "orderid" in items.keys():  # if this funciton is nested, need to parse more
-                items = items["orderid"][order_num]
+                items = items["orderid"][order_id]
             if isinstance(items, list):
                 for item in items:
                     if item["status"] == status:
                         yield item
 
     def find_order_with_note(self, search_note, active_only=True):
+        """
+        Finds an order with a note which CONTAINS the search note. An
+        input note of "my-order" will return an order with note
+        "my-order-2016-01-01".
 
+        not sure if this behavior is desired or not.
+        """
         if active_only:
             orders = self.get_active_orders()
         else:
@@ -155,17 +163,24 @@ class Client(BaseClient):
                 if search_note in note:
                     yield order_name
 
-    def safe_post_order(self, order, active_only=True):
-
-        if "note" in order.keys():
-            new_note = order["note"]
+    def safe_post_order(self, order_id, active_only=True):
+        """
+        exactly as .post_order() of the parent class, but will first
+        check for existing orders with a common 'note' field. If one or more
+        are found, function returns a response that looks like a fresh
+        order response, but with the already existing order ID.
+        """
+        if "note" in order_id.keys():
+            new_note = order_id["note"]
 
             orders_with_same_note = list(self.find_order_with_note(new_note, active_only))
             if len(orders_with_same_note) > 0:
                 print("Found duplicate past order(s): {0}".format(orders_with_same_note))
+                print("input note: {0}".format(new_note))
+                print("existing note: {0}".format(orders_with_same_note[0]['note']))
                 return {"orderid": orders_with_same_note[0]}
             else:
-                return self.post_order(order).json()
+                return self.post_order(order_id).json()
 
     def _error_items(self, order, verbose=False):
         """ returns list of items with status 'error', can print summary. """
@@ -177,9 +192,12 @@ class Client(BaseClient):
                     print('\t', item["name"], item["note"])
         return error_items
 
-    def _active_items(self, order, verbose=False):
-        """ returns list of items with active statuses, can print summary."""
-        all_items = self.get_item_status(order).json()["orderid"][order]
+    def _active_items(self, order_id, verbose=False):
+        """
+        returns list of items with active statuses, (not complete or error).
+        can print summary if verbose is True.
+        """
+        all_items = self.get_item_status(order_id).json()["orderid"][order_id]
         active_items = [item for item in all_items
                         if item['status'] != 'complete' and item['status'] != 'error']
         if verbose:
@@ -203,13 +221,13 @@ class Client(BaseClient):
         return complete_items
 
     # TODO: some check to ensure input downloader is appropriate for each filet ype.
-    def download_order_gen(self, order, downloader, sleep_time=300, timeout=86400, **dlkwargs):
+    def download_order_gen(self, order_id, downloader, sleep_time=300, timeout=86400, **dlkwargs):
         """
         This function is a generator that yields the results from the input downloader classes
         download() method. This is a generator mostly so that data pipeline functions that operate
         upon freshly downloaded files may immediately get started on them.
 
-        :param order:               order name
+        :param order_id:               order name
         :param downloader:          instance of a Downloaders.BaseDownloader or child class
         :param sleep_time:          number of seconds to wait between checking order status
         :param timeout:             maximum number of seconds to run program
@@ -227,7 +245,7 @@ class Client(BaseClient):
             print("Elapsed time is {0}m".format(elapsed_time / 60.0))
 
             # check order completion status, and list all items which ARE complete
-            complete_items = self._complete_items(order, verbose=False)
+            complete_items = self._complete_items(order_id, verbose=False)
 
             for c in complete_items:
                 if isinstance(c, dict):
@@ -236,9 +254,11 @@ class Client(BaseClient):
                 elif isinstance(c, requests.Request):
                     url = c.json()["product_dload_url"]
                     yield downloader.download(url, **dlkwargs)
+                else:
+                    raise Exception("Could not interpret {0}".format(c))
 
             def is_complete():
-                return len(self._active_items(order, verbose=True)) < 1
+                return len(self._active_items(order_id, verbose=True)) < 1
 
             # check for completeness and break or wait.
             complete = is_complete()

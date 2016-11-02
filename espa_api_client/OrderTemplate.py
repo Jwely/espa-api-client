@@ -51,17 +51,33 @@ class OrderTemplate(object):
      """
 
     def __init__(self, name, auto_load=True, template_dir=TEMPLATE_DIR):
+        """
+        Creates an order template instance. If input name already exists and
+        auto_load is True, it will check for file '{name}.json' in the template_dir
+        and load its contents if available. To create new order templates,
+        :param name:
+        :param auto_load:
+        :param template_dir:
+        """
         self.name = name
         self.path = os.path.join(template_dir, "{}.json".format(self.name))
-        self.template = None
+        self.template = dict()
 
         if os.path.exists(self.path) and auto_load:
             self.load()
+
+    def define(self, template_dict):
+        """ allows input of template dictionary """
+        self.template.update(template_dict)
+        self.save()
+        return self
 
     def save(self):
         """ saves the template attribute to json """
         with open(self.path, 'w+') as f:
             f.write(json.dumps(self.template, indent=2))
+        print("Template saved to {0}".format(self.path))
+        return self
 
     def load(self, path=None):
         """ loads template attribute from json """
@@ -70,9 +86,10 @@ class OrderTemplate(object):
         with open(path, 'r') as f:
             self.template = json.loads(f.read())
             print("loaded template from {0}".format(path))
-            return self
+        return self
 
     def copy_from(self, template_name):
         """ replaces the order content in this template with that from another template """
         other_template = OrderTemplate(template_name)
-        self.template = other_template.load()
+        self.template = other_template.load().template
+        return self

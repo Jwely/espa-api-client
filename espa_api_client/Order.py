@@ -38,6 +38,7 @@ class Order(object):
         return json.dumps(self.order_content, **kwargs)
 
     def set_order_note(self, note):
+        """ sets 'note' property of the order """
         self.order_content['note'] = note
 
     def add_tiles(self, mission, tiles):
@@ -49,7 +50,7 @@ class Order(object):
         return self
 
     def submit(self, client=None):
-        """ submit the json content of an order to an input client """
+        """ submit the content of an order to an input Client instance. """
         if client is None:
             client = Client()
 

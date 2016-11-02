@@ -99,7 +99,7 @@ class EspaLandsatLocalDownloader(BaseDownloader):
 
         :param source:  url from which to download data
         :param mode:    either 'w' or 'w+' to write or overwrite
-        :param cleanup: use True to delete intermeidate files (the targzs)
+        :param cleanup: use True to delete intermediate files (the tar.gz's)
         :return: tuple(destination path (str), new_download? (bool))
         """
         raw_dest = self._raw_destination_mapper(source)
