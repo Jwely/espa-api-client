@@ -2,7 +2,7 @@ import requests
 import json
 from time import sleep
 from datetime import datetime
-from espa_api_client import API_HOST_URL, API_VERSION, HEADERS
+from espa_api_client.conf import API_HOST_URL, API_VERSION, HEADERS
 from espa_api_client.Exceptions import AuthError
 
 

@@ -1,7 +1,7 @@
 import json
 import os
 
-from espa_api_client import TEMPLATE_DIR
+from espa_api_client.conf import TEMPLATE_DIR
 
 
 class OrderTemplate(object):

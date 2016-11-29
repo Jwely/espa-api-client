@@ -1,7 +1,8 @@
-import os
+from espa_api_client.Clients import *
+from espa_api_client.Downloaders import *
+from espa_api_client.Exceptions import *
+from espa_api_client.Order import *
+from espa_api_client.OrderTemplate import *
+from espa_api_client.parse import *
 
-LOCAL_PATH = os.path.dirname(os.path.realpath(__file__))
-TEMPLATE_DIR = os.path.join(LOCAL_PATH, 'templates')
-API_HOST_URL = 'https://espa.cr.usgs.gov'
-API_VERSION = 'v0'
-HEADERS = {'Content-Type': 'application/json'}
+
