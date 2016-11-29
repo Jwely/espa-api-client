@@ -29,11 +29,8 @@ One script to order, download, and process data, that need only be run once, but
 re-executed without issue.
 
 ```python
-from espa_api_client.Clients import Client
-from espa_api_client.Order import Order
-from espa_api_client.OrderTemplate import OrderTemplate
-from espa_api_client.parse import get_order_inputs_from_earth_explorer_export
-from espa_api_client.Downloaders import EspaLandsatLocalDownloader
+from espa_api_client import Client, Order, OrderTemplate, EspaLandsatLocalDownloader, \
+    get_order_inputs_from_earth_explorer_export
 
 # build the various handlers to spec
 template = OrderTemplate('example_dc_metro')
