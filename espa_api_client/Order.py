@@ -75,6 +75,13 @@ class Order(object):
 
     def submit(self, client=None):
         """ submit the content of an order to an input Client instance. """
+
+        # the api rejects product specs with no inputs listed, so remove them before submitting.
+        for top_level in self.order_content.keys():
+            if 'inputs' in self.order_content[top_level].keys():
+                if not self.order_content[top_level]['inputs']:
+                    del self.order_content[top_level]
+
         if client is None:
             client = Client()
 
