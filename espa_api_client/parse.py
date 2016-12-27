@@ -8,4 +8,4 @@ def get_order_inputs_from_earth_explorer_export(csv_path):
     """
     df = pd.read_csv(csv_path, encoding="ISO-8859-1")
     tiles = df['Landsat Scene Identifier']
-    return tiles
+    return list(tiles)

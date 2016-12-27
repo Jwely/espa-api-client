@@ -1,9 +1,14 @@
 import requests
-import json
+import simplejson as json
+from simplejson.scanner import JSONDecodeError
 from time import sleep
 from datetime import datetime
 from espa_api_client.conf import API_HOST_URL, API_VERSION, HEADERS
 from espa_api_client.Exceptions import AuthError
+
+
+class ServiceOfflineError(Exception):
+    pass
 
 
 class BaseClient(object):
@@ -36,10 +41,13 @@ class BaseClient(object):
     def _test_auth(self):
         """ checks that authentication info works """
         user = self.get_user()
-        if "Invalid username/password" in user.json().values():
-            return False
-        else:
-            return True
+        try:
+            if "Invalid username/password" in user.json().values():
+                return False
+            else:
+                return True
+        except JSONDecodeError:
+            raise ServiceOfflineError("{}".format(user))
 
     def _url(self, *args):
         """

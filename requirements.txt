@@ -1,5 +1,6 @@
 pandas
 requests
 wget
+simplejson
 
 

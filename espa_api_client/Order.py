@@ -73,6 +73,13 @@ class Order(object):
             raise Exception("mission '{0}' is not in template!".format(mission))
         return self
 
+    def remove_tiles(self, mission, tiles):
+        """ removes tiles from missions "inputs" values """
+        if mission in self.order_content.keys():
+            for tile in tiles:
+                if tile in self.order_content[mission]['inputs']:
+                    self.order_content[mission]['inputs'].remove(tile)
+
     def submit(self, client=None):
         """ submit the content of an order to an input Client instance. """
 

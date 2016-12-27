@@ -26,6 +26,7 @@ def main():
     l7_tiles = get_order_inputs_from_earth_explorer_export('L7_export.csv')
     order.add_tiles("olitirs8", l8_tiles)
     order.add_tiles("etm7", l7_tiles)
+    #order.remove_tiles('olitirs8', l8_tiles[-1])  # removes tiles from order
     orderid = order.submit(client)['orderid']
     for download in client.download_order_gen(orderid, downloader):
         print(download)
