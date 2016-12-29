@@ -2,8 +2,9 @@ import json
 
 from espa_api_client.OrderTemplate import OrderTemplate
 from espa_api_client.Clients import Client
-from espa_api_client.Exceptions import InvalidOrderNote, \
-    EmptyOrderTemplate, InvalidClient
+from espa_api_client.parse import search_landsat_tiles, search_modis_tiles
+from espa_api_client.conf import LANDSAT_PRODUCTS, MODIS_PRODUCTS
+from espa_api_client.Exceptions import *
 
 
 class Order(object):
@@ -65,23 +66,61 @@ class Order(object):
         """ sets 'note' property of the order """
         self.order_content['note'] = note
 
-    def add_tiles(self, mission, tiles):
-        """ adds tiles to a missions "inputs" values """
-        if mission in self.order_content.keys():
-            self.order_content[mission]['inputs'] += tiles
+    def add_tiles(self, product, tiles):
+        """ adds tiles to a products "inputs" values """
+        product = product.lower()
+        for tile in tiles:
+            matches_landsat = search_landsat_tiles(tile)
+            matches_modis = search_modis_tiles(tile)
+            if not (matches_landsat or matches_modis):
+                raise BadTileError("Input tile '{}' appears to be invalid!".format(tile))
+        if product in self.order_content.keys():
+            self.order_content[product]['inputs'] += tiles
         else:
-            raise Exception("mission '{0}' is not in template!".format(mission))
+            raise Exception("product '{0}' is not in template!".format(product))
         return self
 
-    def remove_tiles(self, mission, tiles):
-        """ removes tiles from missions "inputs" values """
-        if mission in self.order_content.keys():
+    def remove_tiles(self, product, tiles):
+        """ removes tiles from products "inputs" values """
+        product = product.lower()
+        if product in self.order_content.keys():
             for tile in tiles:
-                if tile in self.order_content[mission]['inputs']:
-                    self.order_content[mission]['inputs'].remove(tile)
+                if tile in self.order_content[product]['inputs']:
+                    self.order_content[product]['inputs'].remove(tile)
 
-    def submit(self, client=None):
-        """ submit the content of an order to an input Client instance. """
+    def content_purifier(self, response):
+        """
+        Parses request error messages to remove tiles which are mentioned in
+        the error description. Used to remove problem tiles from the order and
+        subsequent resubmission.
+        """
+        check_landsat = any([prod in self.order_content.keys() for prod in LANDSAT_PRODUCTS])
+        check_modis = any([prod in self.order_content.keys() for prod in MODIS_PRODUCTS])
+
+        if 'status' in response.keys():
+            if response['status'] == 400:
+
+                if check_landsat:
+                    bad_tiles = search_landsat_tiles(str(json.dumps(response)))
+                    print("Removing {} bad landsat tiles".format(len(bad_tiles)))
+                    for product in LANDSAT_PRODUCTS:
+                        self.remove_tiles(product, bad_tiles)
+
+                if check_modis:
+                    bad_tiles = search_modis_tiles(str(json.dumps(response)))
+                    print("Removing {} bad modis tiles".format(len(bad_tiles)))
+                    for product in MODIS_PRODUCTS:
+                        self.remove_tiles(product, bad_tiles)
+
+    def submit(self, client=None, ignore_bad_requests=True):
+        """
+        submit the content of an order to an input Client instance.
+        :param client: optional, An authenticated espa_api_client.Client() instance.
+        :param ignore_bad_requests: set True to automatically retry orders with
+                                    errors in them by dumping all tiles mentioned in
+                                    the error message.
+        :return: server response
+        """
 
         # the api rejects product specs with no inputs listed, so remove them before submitting.
         remove_list = []
@@ -97,7 +136,11 @@ class Order(object):
             client = Client()
 
         if isinstance(client, Client):
-            return client.safe_post_order(self.order_content)
+            response = client.safe_post_order(self.order_content)
+            if ignore_bad_requests:
+                self.content_purifier(response)
+                response = client.safe_post_order(self.order_content)
+            return response
         else:
             raise InvalidClient("input 'client' must be an espa_api_client.Client instance")
 

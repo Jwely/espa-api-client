@@ -3,6 +3,9 @@ import tarfile
 import os
 import gzip
 import zipfile
+from time import sleep
+import threading
+from queue import Queue
 
 
 def extract_archive(source_path, destination_path=None, delete_originals=False):
@@ -58,26 +61,28 @@ def extract_archive(source_path, destination_path=None, delete_originals=False):
 
 class BaseDownloader(object):
     """ basic downloader class with general/universal download utils """
+
+    def __init__(self, local_dir):
+        self.local_dir = local_dir
+        self.queue = []
+
+        if not os.path.exists(local_dir):
+            os.mkdir(local_dir)
+
     @staticmethod
-    def _download(source, dest):
-        wget.download(url=source, out=dest)
-        return dest
+    def _download(source, dest, retries=2):
+        trynum = 0
+        while trynum < retries:
+            try:
+                wget.download(url=source, out=dest)
+                return dest
+            except:
+                sleep(1)
 
     @staticmethod
     def _extract(source, dest):
         """ extracts a file to destination"""
         return extract_archive(source, dest, delete_originals=False)
-
-
-class EspaLandsatLocalDownloader(BaseDownloader):
-    """
-    Downloader class to download and name landsat files from the
-    ESPA processing service found at https://espa.cr.usgs.gov/
-    """
-    def __init__(self, local_dir):
-        self.local_dir = local_dir
-        if not os.path.exists(local_dir):
-            os.mkdir(local_dir)
 
     def _raw_destination_mapper(self, source):
         """ returns raw download destination from source url"""
@@ -90,7 +95,6 @@ class EspaLandsatLocalDownloader(BaseDownloader):
         tilename = filename
         return os.path.join(self.local_dir, tilename)
 
-    # TODO: function should verify that a source url looks like a landsat tile.
     def download(self, source, mode='w', cleanup=True):
         """
         Downloads the source url and extracts it to a folder. Returns
@@ -111,19 +115,6 @@ class EspaLandsatLocalDownloader(BaseDownloader):
         else:
             print("Found: {0}, Use mode='w+' to force rewrite".format(ext_dest))
             fresh = False
-
         if cleanup and os.path.exists(raw_dest):
             os.remove(raw_dest)
-
         return ext_dest, fresh
-
-
-class EspaMODISLocalDownloader(BaseDownloader):
-
-    def __init__(self):
-        raise NotImplementedError('''
-        Since the EPSA service offers landsat and MODIS products, and im not sure
-        the landsat local downloader will work for MODIS (it expects tar.gz files
-        with landsat folders inside), there really should be a downloader class
-        for MODIS data
-        ''')

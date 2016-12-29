@@ -5,7 +5,10 @@
 Python interface to the [API for ordering from ESPA](https://github.com/USGS-EROS/espa-api). This API allows lots of custom processing of surface reflectance corrected data for landsat, and some other very useful science grade computations. So, this python client provides some friendly interfaces with the API to make life a little easier.
 
 ## Installation
-Note, at this stage, the package is completely untested outside of py3 on Ubuntu 16. 
+Notes:
+
+Primary testing for this package as been performed on python 3.5 on Ubuntu, and mostly for Landsat.
+MODIS data not yet supported.
 
 ```
 pip install espa-api-client
@@ -145,8 +148,8 @@ Lets say you want a template that will work for ANY landsat tile over any geogra
 ```
 
 ## TODO:
-* better docs
-* Need downloader for landsat and modis to be separate, and easily selected by the client.
-* Some kind of template creation assistant would be good
-* Template creation assistant could also include order validation. ESPA already has their code for this made public.
-* A better way to get scene identifiers than manual EE query and export. I can't believe I haven't been able to find an exposed API for this. landsat-util only works for landsat8.
+[] better docs
+[x] Need downloader for landsat and modis to be separate, and easily selected by the client.
+[] Some kind of template creation assistant would be good
+[] Template creation assistant could also include order validation. ESPA already has their code for this made public.
+[] A better way to get scene identifiers than manual EE query and export. I can't believe I haven't been able to find an exposed API for this. landsat-util only works for landsat8.

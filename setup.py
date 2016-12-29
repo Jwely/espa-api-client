@@ -22,13 +22,13 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='1.0.0.dev15',
+    version='1.0.0.dev16',
 
     description='Python interface to the espa-api',
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/Jwely',
+    url='https://github.com/Jwely/espa-api-client',
 
     # Author details
     author='Jwely',
@@ -76,7 +76,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['requests', 'wget'],
+    install_requires=['requests', 'wget', 'pandas'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,

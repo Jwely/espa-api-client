@@ -7,6 +7,10 @@
         "inputs": [],
         "products": ["sr", "sr_ndvi", "sr_savi", "sr_msavi", "cloud"]
     },
+    "myd13a1": {
+        "inputs": [],
+        "products": ["l1"]
+    },
     "format": "gtiff",
     "plot_statistics": false,
     "projection": {

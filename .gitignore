@@ -3,7 +3,8 @@
 *.pyc
 
 # ignore example downloads, but keep template
-docs/example/downloads
+docs/example/espa_downloads
+docs/example/modis_downloads
 !espa_api_client/templates/example_dc_metro.json
 
 # ignore all other json templates.

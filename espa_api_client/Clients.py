@@ -3,8 +3,10 @@ import simplejson as json
 from simplejson.scanner import JSONDecodeError
 from time import sleep
 from datetime import datetime
+from espa_api_client.parse import search_landsat_tiles, search_modis_tiles
 from espa_api_client.conf import API_HOST_URL, API_VERSION, HEADERS
-from espa_api_client.Exceptions import AuthError
+from espa_api_client.Exceptions import *
+from espa_api_client.Downloaders import BaseDownloader
 
 
 class ServiceOfflineError(Exception):
@@ -246,23 +248,30 @@ class Client(BaseClient):
                     print('\t', item["name"], item["completion_date"])
         return complete_items
 
-    # TODO: some check to ensure input downloader is appropriate for each filet ype.
-    def download_order_gen(self, order_id, downloader, sleep_time=300, timeout=86400, **dlkwargs):
+    def download_order_gen(self, order_id, downloader=None, sleep_time=300, timeout=86400, **dlkwargs):
         """
         This function is a generator that yields the results from the input downloader classes
         download() method. This is a generator mostly so that data pipeline functions that operate
         upon freshly downloaded files may immediately get started on them.
 
-        :param order_id:               order name
-        :param downloader:          instance of a Downloaders.BaseDownloader or child class
+        :param order_id:            order name
+        :param downloader:          optional downloader for tiles. child of BaseDownloader class
+                                    of a Downloaders.BaseDownloader or child class
         :param sleep_time:          number of seconds to wait between checking order status
         :param timeout:             maximum number of seconds to run program
         :param dlkwargs:            keyword arguments for downloader.download() method.
         :returns:                   yields values from the input downloader.download() method.
         """
+
+        def is_complete():
+            return len(self._active_items(order_id, verbose=True)) < 1
+
         complete = False
         reached_timeout = False
         starttime = datetime.now()
+
+        if downloader is None:
+            downloader = BaseDownloader('espa_downloads')
 
         while not complete and not reached_timeout:
             # wait a while before the next ping and check timeout condition
@@ -276,18 +285,12 @@ class Client(BaseClient):
             for c in complete_items:
                 if isinstance(c, dict):
                     url = c["product_dload_url"]
-                    yield downloader.download(url, **dlkwargs)
                 elif isinstance(c, requests.Request):
                     url = c.json()["product_dload_url"]
-                    yield downloader.download(url, **dlkwargs)
                 else:
                     raise Exception("Could not interpret {0}".format(c))
+                yield downloader.download(url, **dlkwargs)
 
-            def is_complete():
-                return len(self._active_items(order_id, verbose=True)) < 1
-
-            # check for completeness and break or wait.
             complete = is_complete()
-            if complete:
-                break
-            sleep(sleep_time)
+            if not complete:
+                sleep(sleep_time)

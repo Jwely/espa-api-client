@@ -2,6 +2,10 @@ class AuthError(Exception):
     pass
 
 
+class BadTileError(Exception):
+    pass
+
+
 class EmptyOrderTemplate(Exception):
     pass
 
@@ -11,4 +15,8 @@ class InvalidOrderNote(Exception):
 
 
 class InvalidClient(Exception):
+    pass
+
+
+class DownloadURLError(Exception):
     pass
