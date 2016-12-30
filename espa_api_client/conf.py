@@ -7,6 +7,7 @@ API_VERSION = 'v0'
 HEADERS = {'Content-Type': 'application/json'}
 
 LANDSAT_TILE_REGEX = "(L)(C|O|T|E)(7|8|5|4)(\d{3})(\d{3})(\d{7})(\w{3})(\d{2})"
+LANDSAT_SHORT_REGEX = "(L)(C|O|T|E)(7|8|5|4)(\d{3})(\d{3})(\d{7})"
 LANDSAT_PRODUCTS = ["oli8",
                     "tm4",
                     "tm5",

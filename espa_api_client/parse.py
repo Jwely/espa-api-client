@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 import json
-from espa_api_client.conf import LANDSAT_TILE_REGEX, MODIS_TILE_REGEX
+from espa_api_client.conf import LANDSAT_TILE_REGEX, LANDSAT_SHORT_REGEX, MODIS_TILE_REGEX
 
 
 def get_order_inputs_from_earth_explorer_export(csv_path):
@@ -19,9 +19,13 @@ def get_order_inputs_from_earth_explorer_export(csv_path):
     return tiles
 
 
-def search_landsat_tiles(string):
+def search_landsat_tiles(string, short=False):
     """ searches string for landsat tiles and returns list of any found """
-    tiles = re.findall(LANDSAT_TILE_REGEX.lower(), string.lower())
+    if short:
+        regex = LANDSAT_SHORT_REGEX
+    else:
+        regex = LANDSAT_TILE_REGEX
+    tiles = re.findall(regex.lower(), string.lower())
     if tiles:
         tiles = [''.join(chunks).upper() for chunks in tiles]
     return list(set(tiles))
