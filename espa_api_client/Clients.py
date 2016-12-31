@@ -227,7 +227,9 @@ class Client(BaseClient):
         """
         all_items = self.get_item_status(order_id).json()["orderid"][order_id]
         active_items = [item for item in all_items
-                        if item['status'] != 'complete' and item['status'] != 'error']
+                        if item['status'] != 'complete' and
+                        item['status'] != 'error' and
+                        item['status'] != 'unavailable']
         if verbose:
             if len(active_items) > 0:
                 print("Active items ({0})".format(len(active_items)))
