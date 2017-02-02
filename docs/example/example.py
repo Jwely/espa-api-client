@@ -18,7 +18,7 @@ to download the order products if the script is halted.
 def main():
     template = OrderTemplate('example_dc_metro')
     order = Order(template, note="DC-metro-20161228-3")
-    client = Client(auth=('JeffEly', 'bobfredjoe1'))
+    client = Client()
 
     l8_tiles = get_order_inputs_from_earth_explorer_export('L8_export.csv')
     l7_tiles = get_order_inputs_from_earth_explorer_export('L7_export.csv')
