@@ -137,9 +137,11 @@ class Order(object):
 
         if isinstance(client, Client):
             response = client.safe_post_order(self.order_content)
-            if ignore_bad_requests:
-                self.content_purifier(response)
-                response = client.safe_post_order(self.order_content)
+            if ignore_bad_requests and 'status' in response.keys():
+                if response['status'] == 400:
+                    print("dumping rejected tiles")
+                    self.content_purifier(response)
+                    response = client.safe_post_order(self.order_content)
             return response
         else:
             raise InvalidClient("input 'client' must be an espa_api_client.Client instance")
