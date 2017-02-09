@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+sudo apt-get install twine
 twine upload dist/*
 rm -rf build
 rm -rf dist
