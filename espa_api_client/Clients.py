@@ -137,10 +137,12 @@ class Client(BaseClient):
             else:
                 break
 
-    def get_items_by_status(self, order_id=None, status="complete"):
+    def get_items_by_status(self, order_id=None, status=None):
         """
         generator of items with input status. Common status responses
         are ['complete', 'error', 'queued', 'processing', 'cached'].
+
+        Use status = None to get all items regardless of status
         """
         if order_id is None:
             for order_id in self.get_active_orders():
@@ -151,8 +153,11 @@ class Client(BaseClient):
                 items = items["orderid"][order_id]
             if isinstance(items, list):
                 for item in items:
-                    if item["status"] == status:
+                    if status is None:
                         yield item
+                    else:
+                        if item["status"] == status:
+                            yield item
 
     def list_order_notes(self, active_only=True, verbose=False):
         """
