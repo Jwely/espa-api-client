@@ -255,6 +255,21 @@ class Client(BaseClient):
                     print('\t', item["name"], item["completion_date"])
         return complete_items
 
+    @staticmethod
+    def download_item(item, downloader=None, **dlkwargs):
+        """ uses the given downloader class or a default one to download a single item """
+        if downloader is None:
+            downloader = BaseDownloader('espa_downloads')
+
+        url = None
+        if isinstance(item, dict):
+            url = item['product_dload_url']
+        elif isinstance(item, requests.Request):
+            url = item.json()['product_dload_url']
+
+        if url is not None:
+            return downloader.download(url, **dlkwargs)
+
     def download_order_gen(self, order_id, downloader=None, sleep_time=300, timeout=86400, **dlkwargs):
         """
         This function is a generator that yields the results from the input downloader classes
@@ -290,13 +305,7 @@ class Client(BaseClient):
             complete_items = self._complete_items(order_id, verbose=False)
 
             for c in complete_items:
-                if isinstance(c, dict):
-                    url = c["product_dload_url"]
-                elif isinstance(c, requests.Request):
-                    url = c.json()["product_dload_url"]
-                else:
-                    raise Exception("Could not interpret {0}".format(c))
-                yield downloader.download(url, **dlkwargs)
+                yield self.download_item(c, downloader, **dlkwargs)
 
             complete = is_complete()
             if not complete:
