@@ -132,10 +132,8 @@ class Client(BaseClient):
         we hit the first purged order, every order under it will also be purged.
         """
         for order in self.get_orders_list().json()["orders"]:
-            if self.get_order_status(order).json()["status"] != "purged":
+            if self.get_order(order).json()["status"] != "purged":
                 yield order
-            else:
-                break
 
     def get_items_by_status(self, order_id=None, status=None):
         """

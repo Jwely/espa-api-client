@@ -41,5 +41,5 @@ def main():
         # See the Client class for further documentation.
 
 if __name__ == "__main__":
-    main()
-
+    #main()
+    pass
