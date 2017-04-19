@@ -3,7 +3,7 @@ import simplejson as json
 from simplejson.scanner import JSONDecodeError
 from time import sleep
 from datetime import datetime
-from espa_api_client.parse import search_landsat_tiles, search_modis_tiles
+import warnings
 from espa_api_client.conf import API_HOST_URL, API_VERSION, HEADERS
 from espa_api_client.Exceptions import *
 from espa_api_client.Downloaders import BaseDownloader
@@ -49,7 +49,8 @@ class BaseClient(object):
             else:
                 return True
         except JSONDecodeError:
-            raise ServiceOfflineError("{}".format(user))
+            warnings.warn("ESPA Service appears to be offline! Response: {}".format(user.json()))
+            return True
 
     def _url(self, *args):
         """

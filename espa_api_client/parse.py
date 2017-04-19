@@ -21,13 +21,21 @@ def get_order_inputs_from_earth_explorer_export(csv_path):
 
 def search_landsat_tiles(string, short=False):
     """ searches string for landsat tiles and returns list of any found """
+
+    tiles = []
+    # even if short is False, try short tile spec if long tile produces nothing.
+    if not short:
+        long_tiles = re.findall(LANDSAT_TILE_REGEX.lower(), string.lower())
+        if long_tiles:
+            tiles = [''.join(chunks).upper() for chunks in long_tiles]
+        else:
+            short = True
+
     if short:
-        regex = LANDSAT_SHORT_REGEX
-    else:
-        regex = LANDSAT_TILE_REGEX
-    tiles = re.findall(regex.lower(), string.lower())
-    if tiles:
-        tiles = [''.join(chunks).upper() for chunks in tiles]
+        short_tiles = re.findall(LANDSAT_SHORT_REGEX.lower(), string.lower())
+        if short_tiles:
+            tiles = [''.join(chunks).upper() for chunks in short_tiles]
+
     return list(set(tiles))
 
 
