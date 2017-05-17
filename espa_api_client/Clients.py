@@ -120,7 +120,10 @@ class Client(BaseClient):
     """
     def __init__(self, auth=None):
         super(Client, self).__init__(auth)
-        self.schema = self.get_order_schema().json()
+        try:
+            self.schema = self.get_order_schema().json()
+        except:  # happens when server is down
+            pass
 
     def available_sensors(self):
         """ lists available sensors from the order schema """
