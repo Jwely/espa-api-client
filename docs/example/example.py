@@ -17,17 +17,19 @@ to download the order products if the script is halted.
 
 def main():
     template = OrderTemplate('example_dc_metro')
-    order = Order(template, note="DC-metro-20161228-3")
+    order = Order(template, note="DC-metro-20170524-trash")
     client = Client()
 
     l8_tiles = get_order_inputs_from_earth_explorer_export('L8_export.csv')
-    l7_tiles = get_order_inputs_from_earth_explorer_export('L7_export.csv')
-    myd13a1_tiles = get_order_inputs_from_earth_explorer_export('MYD13A1_export.csv')
+    # l7_tiles = get_order_inputs_from_earth_explorer_export('L7_export.csv')
+    # myd13a1_tiles = get_order_inputs_from_earth_explorer_export('MYD13A1_export.csv')
     order.add_tiles("olitirs8", l8_tiles)
-    order.add_tiles("etm7", l7_tiles)
-    order.add_tiles("olitirs8", ["LC80150332300024LGN00"])  # example of a bad tile addition
-    order.add_tiles("myd13a1", myd13a1_tiles)
+    # order.add_tiles("etm7", l7_tiles)
+    # order.add_tiles("olitirs8", ["LC80150332300024LGN00"])  # example of a bad tile addition
+    # order.add_tiles("myd13a1", myd13a1_tiles)
     response = order.submit(client)
+    print(response)
+
     orderid = response['orderid']
     downloads = client.download_order_gen(order_id=orderid)
     for download in downloads:
@@ -41,5 +43,4 @@ def main():
         # See the Client class for further documentation.
 
 if __name__ == "__main__":
-    #main()
-    pass
+    main()
