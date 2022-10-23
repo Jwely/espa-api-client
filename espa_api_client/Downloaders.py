@@ -28,7 +28,26 @@ def extract_archive(source_path, destination_path=None, delete_originals=False):
 
     if source_path.endswith(".tar.gz"):
         with tarfile.open(source_path, 'r:gz') as tfile:
-            tfile.extractall(set_destpath(destination_path, ".tar.gz"))
+            def is_within_directory(directory, target):
+                
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+            
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                
+                return prefix == abs_directory
+            
+            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+            
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+            
+                tar.extractall(path, members, numeric_owner=numeric_owner) 
+                
+            
+            safe_extract(tfile, set_destpath(destination_path,".tar.gz"))
             ret = destination_path
 
     # gzip only compresses single files
@@ -41,7 +60,26 @@ def extract_archive(source_path, destination_path=None, delete_originals=False):
 
     elif source_path.endswith(".tar"):
         with tarfile.open(source_path, 'r') as tfile:
-            tfile.extractall(set_destpath(destination_path, ".tar"))
+            def is_within_directory(directory, target):
+                
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+            
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                
+                return prefix == abs_directory
+            
+            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+            
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+            
+                tar.extractall(path, members, numeric_owner=numeric_owner) 
+                
+            
+            safe_extract(tfile, set_destpath(destination_path,".tar"))
             ret = destination_path
 
     elif source_path.endswith(".zip"):
